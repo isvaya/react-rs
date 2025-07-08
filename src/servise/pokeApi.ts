@@ -1,4 +1,7 @@
-import type { PokemonListResponse } from '../interface/interface';
+import type {
+  PokemonListResponse,
+  PokemonSpeciesResponse,
+} from '../interface/interface';
 
 export async function fetchPokemonList(
   limit = 20,
@@ -12,4 +15,19 @@ export async function fetchPokemonList(
   }
 
   return await res.json();
+}
+
+export async function fetchPokemonDescription(url: string): Promise<string> {
+  const resPokemon = await fetch(url);
+  if (!resPokemon.ok) throw new Error(`HTTP error: ${resPokemon.status}`);
+  const pokemonData = (await resPokemon.json()) as { species: { url: string } };
+
+  const resSpecies = await fetch(pokemonData.species.url);
+  if (!resSpecies.ok) throw new Error(`HTTP error: ${resSpecies.status}`);
+  const speciesData = (await resSpecies.json()) as PokemonSpeciesResponse;
+
+  const entry = speciesData.flavor_text_entries.find(
+    (e) => e.language.name === 'en'
+  );
+  return entry ? entry.flavor_text.replace(/\s+/g, ' ') : 'No description';
 }

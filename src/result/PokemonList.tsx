@@ -1,6 +1,6 @@
 import React from 'react';
-import { fetchPokemonList } from '../servise/pokeApi';
-import type { State, Pokemon } from '../interface/interface';
+import { fetchPokemonDescription, fetchPokemonList } from '../servise/pokeApi';
+import type { State, PokemonWithDescription } from '../interface/interface';
 
 export class PokemonList extends React.Component<unknown, State> {
   constructor(props: unknown) {
@@ -13,14 +13,30 @@ export class PokemonList extends React.Component<unknown, State> {
   }
 
   componentDidMount(): void {
-    this.loadPokemons();
+    this.loadPokemonsWithDescription();
   }
 
-  async loadPokemons() {
+  private async loadPokemonsWithDescription() {
     this.setState({ loading: true, error: null });
     try {
-      const data = await fetchPokemonList(20, 0);
-      this.setState({ pokemons: data.results, loading: false });
+      const listData = await fetchPokemonList(20, 0);
+
+      const detailed: PokemonWithDescription[] = await Promise.all(
+        listData.results.map(async ({ name, url }) => {
+          let description: string;
+          try {
+            description = await fetchPokemonDescription(url);
+          } catch {
+            description = 'Error loading description';
+          }
+          return { name, description };
+        })
+      );
+
+      this.setState({
+        pokemons: detailed,
+        loading: false,
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       this.setState({ error: message, loading: false });
@@ -35,9 +51,9 @@ export class PokemonList extends React.Component<unknown, State> {
 
     return (
       <ul>
-        {pokemons.map((p: Pokemon) => (
+        {pokemons.map((p) => (
           <li key={p.name}>
-            {p.name}-{p.url}
+            {p.name}-{p.description}
           </li>
         ))}
       </ul>
