@@ -31,3 +31,22 @@ export async function fetchPokemonDescription(url: string): Promise<string> {
   );
   return entry ? entry.flavor_text.replace(/\s+/g, ' ') : 'No description';
 }
+
+export async function fetchPokemonByName(
+  name: string
+): Promise<{ name: string; description: string }> {
+  // const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+  // if (!res.ok) {
+  //   throw new Error(`HTTP error: ${res.status}`);
+  // }
+
+  // return await res.json();
+  const pokemonUrl = `https://pokeapi.co/api/v2/pokemon/${name}`;
+
+  try {
+    const description = await fetchPokemonDescription(pokemonUrl);
+    return { name, description };
+  } catch {
+    throw new Error(`Pokemon "${name}" not found`);
+  }
+}

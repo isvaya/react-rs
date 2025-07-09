@@ -27,3 +27,17 @@ export interface PokemonSpeciesResponse {
     language: { name: string };
   }[];
 }
+
+export interface SearchPokemonState {
+  searchTerm: string;
+  history: PokemonWithDescription[];
+  loading: boolean;
+  error: string | null;
+}
+
+export interface SearchResultsProps {
+  history: PokemonWithDescription[];
+  error: string | null;
+  loading: boolean;
+  onRetry: () => void;
+}
