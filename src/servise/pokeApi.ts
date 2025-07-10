@@ -35,12 +35,6 @@ export async function fetchPokemonDescription(url: string): Promise<string> {
 export async function fetchPokemonByName(
   name: string
 ): Promise<{ name: string; description: string }> {
-  // const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-  // if (!res.ok) {
-  //   throw new Error(`HTTP error: ${res.status}`);
-  // }
-
-  // return await res.json();
   const pokemonUrl = `https://pokeapi.co/api/v2/pokemon/${name}`;
 
   try {

@@ -3,37 +3,33 @@ import React from 'react';
 
 export class SearchResult extends React.Component<SearchResultsProps> {
   render() {
-    const { history, error, loading, onRetry } = this.props;
-
-    if (loading) {
-      return <p>Loading...</p>;
+    const { history, error, onRetry } = this.props;
+    if (error) {
+      return (
+        <div className="bottom-section">
+          <div className="error">{error}</div>
+          <button onClick={onRetry}>Try again!</button>
+        </div>
+      );
     }
-
     return (
-      <div>
-        {error ? (
-          <div>
-            <div className="error">{error}</div>
-            <div onClick={onRetry}>Try again!</div>
-          </div>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Description</th>
+      <div className="bottom-section">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {history.map((p, idx) => (
+              <tr key={idx}>
+                <td>{p.name}</td>
+                <td>{p.description}</td>
               </tr>
-            </thead>
-            <tbody>
-              {history.map((p, idx) => (
-                <tr key={idx}>
-                  <td>{p.name}</td>
-                  <td>{p.description}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   }
