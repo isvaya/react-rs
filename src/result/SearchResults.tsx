@@ -3,7 +3,17 @@ import React from 'react';
 
 export class SearchResult extends React.Component<SearchResultsProps> {
   render() {
-    const { history, error, onRetry } = this.props;
+    const { history, error, loading, onRetry } = this.props;
+
+    if (loading) {
+      return (
+        <div className="bottom-section">
+          {/* <p>Loading...</p> */}
+          <div className="spinner" />
+        </div>
+      );
+    }
+
     if (error) {
       return (
         <div className="bottom-section">
@@ -12,6 +22,7 @@ export class SearchResult extends React.Component<SearchResultsProps> {
         </div>
       );
     }
+
     return (
       <div className="bottom-section">
         <table>
