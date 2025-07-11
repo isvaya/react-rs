@@ -5,6 +5,7 @@ import { SearchControls } from './top-controlls/SearchInput';
 import { SearchResult } from './result/SearchResults';
 import { fetchPokemonByName, fetchPokemonList } from './servise/pokeApi';
 import { ErrorBoundary } from './errorCatching/ErrorBoundary';
+import { Bomb } from './errorCatching/CrashButton';
 
 export class App extends React.Component<unknown, SearchPokemonState> {
   state: SearchPokemonState = {
@@ -12,6 +13,7 @@ export class App extends React.Component<unknown, SearchPokemonState> {
     history: [],
     loading: false,
     error: null,
+    crash: false,
   };
 
   private loadResults = async (term: string) => {
@@ -75,6 +77,10 @@ export class App extends React.Component<unknown, SearchPokemonState> {
           loading={this.state.loading}
           onRetry={this.handleSearch}
         />
+        <button onClick={() => this.setState({ crash: true })}>
+          Crash App!
+        </button>
+        {this.state.crash && <Bomb />}
       </ErrorBoundary>
     );
   }

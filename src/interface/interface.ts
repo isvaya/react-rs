@@ -33,6 +33,7 @@ export interface SearchPokemonState {
   history: PokemonWithDescription[];
   loading: boolean;
   error: string | null;
+  crash: boolean;
 }
 
 export interface SearchResultsProps {
