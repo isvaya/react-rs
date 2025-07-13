@@ -16,7 +16,7 @@ export class App extends React.Component<unknown, SearchPokemonState> {
     crash: false,
   };
 
-  private loadResults = async (term: string) => {
+  private loadResults = async (term: string, resetHistory = false) => {
     this.setState({ loading: true, error: null });
 
     try {
@@ -33,7 +33,7 @@ export class App extends React.Component<unknown, SearchPokemonState> {
       }
 
       this.setState((prev) => ({
-        history: [...entries, ...prev.history],
+        history: resetHistory ? entries : [...entries, ...prev.history],
         loading: false,
       }));
     } catch (e) {
@@ -58,7 +58,7 @@ export class App extends React.Component<unknown, SearchPokemonState> {
   componentDidMount() {
     const saved = localStorage.getItem('lastSearch') || '';
     this.setState({ searchTerm: saved }, () => {
-      this.loadResults(saved);
+      this.loadResults(saved, true);
     });
   }
 
@@ -70,14 +70,17 @@ export class App extends React.Component<unknown, SearchPokemonState> {
           onInputChange={this.handleInputChange}
           onSearch={this.handleSearch}
           loading={this.state.loading}
+          error={this.state.error}
+          onRetry={() => this.loadResults(this.state.searchTerm.trim(), true)}
         />
         <SearchResult
           history={this.state.history}
-          error={this.state.error}
           loading={this.state.loading}
-          onRetry={this.handleSearch}
         />
-        <button onClick={() => this.setState({ crash: true })}>
+        <button
+          className="crash-button"
+          onClick={() => this.setState({ crash: true })}
+        >
           Crash App!
         </button>
         {this.state.crash && <Bomb />}

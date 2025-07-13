@@ -28,7 +28,8 @@ export class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div>
+        <div className="error-bounder">
+          <img className="error-pikachu" src="/pikachu.jpg" alt="sad-pikachu" />
           Something went wrong...{' '}
           <button onClick={() => window.location.reload()}>Reload page</button>
         </div>

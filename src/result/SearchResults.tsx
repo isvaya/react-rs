@@ -3,44 +3,37 @@ import React from 'react';
 
 export class SearchResult extends React.Component<SearchResultsProps> {
   render() {
-    const { history, error, loading, onRetry } = this.props;
+    const { history, loading } = this.props;
 
     if (loading) {
       return (
         <div className="bottom-section">
-          {/* <p>Loading...</p> */}
           <div className="spinner" />
-        </div>
-      );
-    }
-
-    if (error) {
-      return (
-        <div className="bottom-section">
-          <div className="error">{error}</div>
-          <button onClick={onRetry}>Try again!</button>
         </div>
       );
     }
 
     return (
       <div className="bottom-section">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {history.map((p, idx) => (
-              <tr key={idx}>
-                <td>{p.name}</td>
-                <td>{p.description}</td>
+        <h4>RESULTS:</h4>
+        <div className="results-container">
+          <table>
+            <thead>
+              <tr className="tr-results">
+                <th className="name">Pokémon&apos;s name</th>
+                <th className="description">Pokémon&apos;s description</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {history.map((p, idx) => (
+                <tr key={idx}>
+                  <td className="name-result">{p.name}</td>
+                  <td className="description-result">{p.description}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }

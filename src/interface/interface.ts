@@ -38,9 +38,7 @@ export interface SearchPokemonState {
 
 export interface SearchResultsProps {
   history: PokemonWithDescription[];
-  error: string | null;
   loading: boolean;
-  onRetry: () => void;
 }
 
 export interface SearchControlsProps {
@@ -48,6 +46,8 @@ export interface SearchControlsProps {
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSearch: () => void;
   loading: boolean;
+  error: string | null;
+  onRetry: () => void;
 }
 
 export interface ErrorBoundaryProps {
