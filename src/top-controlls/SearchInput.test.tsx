@@ -72,4 +72,54 @@ describe('SearchControls', () => {
     fireEvent.click(screen.getByRole('button', { name: /search/i }));
     expect(onSearch).toHaveBeenCalled();
   });
+
+  it('show "Loading..." и блокирует кнопку при loading=true', () => {
+    render(
+      <SearchControls
+        searchTerm="anything"
+        onInputChange={onInputChange}
+        onSearch={onSearch}
+        loading={true}
+        error={null}
+        onRetry={onSearch}
+      />
+    );
+    const btn = screen.getByRole('button', { name: /loading/i });
+    expect(btn).toBeDisabled();
+  });
+
+  it('display block of error and button "Try again", and calls onRetry', () => {
+    const onRetry = vi.fn();
+    render(
+      <SearchControls
+        searchTerm="test"
+        onInputChange={onInputChange}
+        onSearch={onSearch}
+        loading={false}
+        error="Oops!"
+        onRetry={onRetry}
+      />
+    );
+    expect(screen.getByText('Oops!')).toBeInTheDocument();
+
+    const retryBtn = screen.getByRole('button', { name: /try again/i });
+    expect(retryBtn).toBeInTheDocument();
+
+    fireEvent.click(retryBtn);
+    expect(onRetry).toHaveBeenCalled();
+  });
+
+  it('nothing renders the error block if  error=null', () => {
+    render(
+      <SearchControls
+        searchTerm="test"
+        onInputChange={onInputChange}
+        onSearch={onSearch}
+        loading={false}
+        error={null}
+        onRetry={onSearch}
+      />
+    );
+    expect(screen.queryByText(/Try again/i)).toBeNull();
+  });
 });
