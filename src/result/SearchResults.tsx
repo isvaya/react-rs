@@ -1,5 +1,6 @@
 import type { SearchResultsProps } from '../interface/interface';
 import React from 'react';
+import { PokemonCardRow } from '../card/PokemonCard';
 
 export class SearchResult extends React.Component<SearchResultsProps> {
   render() {
@@ -25,11 +26,8 @@ export class SearchResult extends React.Component<SearchResultsProps> {
               </tr>
             </thead>
             <tbody>
-              {history.map((p, idx) => (
-                <tr key={idx}>
-                  <td className="name-result">{p.name}</td>
-                  <td className="description-result">{p.description}</td>
-                </tr>
+              {history.map((p) => (
+                <PokemonCardRow key={p.name} {...p} />
               ))}
             </tbody>
           </table>

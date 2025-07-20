@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { SearchResult } from './SearchResults';
+import { PokemonCardRow } from '../card/PokemonCard';
 
 describe('SearchResult', () => {
   it('shows spinner when loading=true', () => {
@@ -34,5 +35,17 @@ describe('SearchResult', () => {
     );
     const rows = container.querySelectorAll('tbody tr');
     expect(rows).toHaveLength(history.length);
+  });
+
+  it('renders a row with name and description', () => {
+    render(
+      <table>
+        <tbody>
+          <PokemonCardRow name="mew" description="Ancient" />
+        </tbody>
+      </table>
+    );
+    expect(screen.getByText('mew')).toBeInTheDocument();
+    expect(screen.getByText('Ancient')).toBeInTheDocument();
   });
 });
