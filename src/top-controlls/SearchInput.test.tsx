@@ -16,7 +16,7 @@ describe('SearchControls', () => {
         searchTerm=""
         onInputChange={onInputChange}
         onSearch={onSearch}
-        loading={false}
+        loading={true}
         error={null}
         onRetry={onSearch}
       />
