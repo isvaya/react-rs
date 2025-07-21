@@ -1,69 +1,40 @@
-# React + TypeScript + Vite
+# PokéApi React App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + TypeScript application for searching Pokémon via the [PokeAPI](https://pokeapi.co/).
 
-Currently, two official plugins are available:
+## Installation
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+# Clone the repo
+git clone <your-repo-url>
+cd <your-repo-folder>
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+# Install dependencies
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+> **Note:** Husky Git hooks will be set up automatically during install.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
+## Available Scripts
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+| Command               | Description                                                               |
+|-----------------------|---------------------------------------------------------------------------|
+| `npm run dev`         | Start Vite dev server (http://localhost:5173)                             |
+| `npm run build`       | Compile TypeScript and build production bundle with Vite                  |
+| `npm run preview`     | Preview the production build locally                                      |
+| `npm run lint`        | Run ESLint to check code quality                                          |
+| `npm run format`      | Run Prettier to format all files                                          |
+| `npm run test`        | Launch Vitest in interactive mode                                         |
+| `npm run test:run`    | Run all tests once                                                        |
+| `npm run test:watch`  | Run Vitest in watch mode to re-run tests on file changes                  |
+| `npm run test:ui`     | Launch Vitest with web-based UI                                           |
+| `npm run coverage`    | Run tests with coverage report (blocks on failures if thresholds not met)  |
+
+## Git Hooks (Husky)
+
+- **pre-commit**  
+  - `npm run lint`  
+  - `npm run format`
+
+- **pre-push**  
+  - `npm run test`
