@@ -124,3 +124,20 @@ table {
   align-items: center;
   justify-content: center;
 }
+
+.master-detail-container {
+  display: flex;
+}
+
+.master-panel {
+  flex: 1;
+}
+
+.detail-panel {
+  flex: 1;
+  padding: 0 1 rem;
+}
+
+.tr-results {
+  cursor: pointer;
+}

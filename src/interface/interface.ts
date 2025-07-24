@@ -57,3 +57,47 @@ export interface ErrorBoundaryProps {
 export interface ErrorBoundaryState {
   hasError: boolean;
 }
+
+export interface PokemonApiResponse {
+  name: string;
+  species: { url: string };
+  sprites: PokemonSprites;
+  abilities: Array<{
+    ability: { name: string };
+  }>;
+  types: Array<{
+    type: { name: string };
+  }>;
+  stats: Array<{
+    base_stat: number;
+    stat: { name: string };
+  }>;
+}
+
+export interface PokemonSpeciesResponse {
+  flavor_text_entries: Array<{
+    flavor_text: string;
+    language: { name: string };
+  }>;
+}
+
+export interface PokemonDetail {
+  name: string;
+  image: string;
+  abilities: string[];
+  types: string[];
+  stats: Array<{
+    name: string;
+    value: number;
+  }>;
+  description: string;
+}
+
+export interface PokemonSprites {
+  front_default: string | null;
+  other?: {
+    'official-artwork'?: {
+      front_default: string | null;
+    };
+  };
+}
