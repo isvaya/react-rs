@@ -14,8 +14,6 @@ export const SearchControls: React.FC<SearchControlsProps> = ({
   return (
     <form className="top-section" onSubmit={onSearch}>
       <div className="logo-title">
-        <img className="pokemon-img" src="/images.jpeg" alt="pikachu" />
-        <h1 className="title-pokemon">PokéApi</h1>
         <h4>Find your Pokémon</h4>
       </div>
       <input

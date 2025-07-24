@@ -27,11 +27,6 @@
   }
 }
 
-.pokemon-img {
-  border-radius: 10px;
-  max-width: 100px;
-}
-
 .search-input {
   height: 18px;
   padding: 5px;
@@ -53,7 +48,7 @@ h4 {
 }
 
 .top-section {
-  height: 330px;
+  height: 150px;
   border-bottom: 2px solid rgb(58, 58, 58);
 }
 
@@ -119,4 +114,13 @@ table {
   align-items: center;
   gap: 30px;
   padding: 20px 0px;
+}
+
+.error-section {
+  padding-top: 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
 }
