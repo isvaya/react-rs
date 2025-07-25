@@ -4,6 +4,7 @@
   align-items: center;
   border-left: 2px solid rgba(255, 255, 255, 0.5);
   padding: 0px 20px;
+  width: 100%;
 }
 
 .detail-top {
@@ -54,4 +55,34 @@
   list-style: none;
   width: 150px;
   text-align: left;
+}
+
+.progress-container {
+  height: 12px;
+  background: #eee;
+  width: 500px;
+  margin-top: 50px;
+  margin-left: 30px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #f5598f;
+  transition: width 0.2s ease-out;
+}
+
+.detail-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detail-close {
+  font-size: 1.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }

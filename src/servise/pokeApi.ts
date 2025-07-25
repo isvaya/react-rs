@@ -54,6 +54,8 @@ async function getJSON<T>(url: string): Promise<T> {
 }
 
 export async function fetchPokemonDetail(name: string): Promise<PokemonDetail> {
+  await new Promise((res) => setTimeout(res, 1500));
+
   const p = await getJSON<PokemonApiResponse>(
     `https://pokeapi.co/api/v2/pokemon/${name}`
   );
