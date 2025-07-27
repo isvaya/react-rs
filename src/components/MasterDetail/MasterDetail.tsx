@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import type { PokemonDetail } from '../../interface/interface';
 import { useEffect, useState, useRef } from 'react';
 import { fetchPokemonDetail } from '../../servise/pokeApi';
@@ -8,6 +8,7 @@ import { PATHS } from '../../enums/enum';
 export const Details: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const navigate = useNavigate();
+  const { search } = useLocation();
 
   const [data, setData] = useState<PokemonDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,7 +76,9 @@ export const Details: React.FC = () => {
           <img className="detail-image" src={data.image} alt={data.name} />
           <button
             className="detail-close"
-            onClick={() => navigate(PATHS.MAIN, { replace: true })}
+            onClick={() =>
+              navigate(`${PATHS.MAIN}${search}`, { replace: true })
+            }
           >
             ✕
           </button>

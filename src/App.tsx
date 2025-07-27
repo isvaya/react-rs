@@ -1,6 +1,6 @@
 import './App.css';
-import type { SearchPokemonState } from './interface/interface';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { SearchControls } from './top-controlls/SearchInput';
 import { SearchResult } from './result/SearchResults';
 import { fetchPokemonByName, fetchPokemonList } from './servise/pokeApi';
@@ -8,69 +8,97 @@ import { ErrorBoundary } from './errorCatching/ErrorBoundary';
 import { Bomb } from './errorCatching/CrashButton';
 
 export const App: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [history, setHistory] = useState<SearchPokemonState['history']>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search') ?? '';
+  const pageParam = parseInt(searchParams.get('page') ?? '1', 10);
+  const pageSize = 5;
+
+  const [draft, setDraft] = useState(searchQuery);
+  const [history, setHistory] = useState<
+    Array<{ name: string; description: string }>
+  >([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [crash, setCrash] = useState<boolean>(false);
+  const [crash, setCrash] = useState(false);
 
-  const loadResults = useCallback(
-    async (term: string, resetHistory = false) => {
-      setLoading(true);
-      setError(null);
+  useEffect(() => {
+    setDraft(searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    (async () => {
       try {
-        let entries: { name: string; description: string }[];
-
-        if (term === '') {
-          const list = await fetchPokemonList(20, 0);
+        let entries: Array<{ name: string; description: string }>;
+        if (searchQuery === '') {
+          const offset = (pageParam - 1) * pageSize;
+          const list = await fetchPokemonList(pageSize, offset);
           entries = await Promise.all(
             list.results.map((r) => fetchPokemonByName(r.name))
           );
         } else {
-          const single = await fetchPokemonByName(term);
+          const single = await fetchPokemonByName(searchQuery);
           entries = [single];
         }
-
-        setHistory((prev) => (resetHistory ? entries : [...entries, ...prev]));
-      } catch (e: unknown) {
-        const message = e instanceof Error ? e.message : String(e);
-        setError(message);
+        setHistory(entries);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
       } finally {
         setLoading(false);
       }
-    },
-    []
-  );
+    })();
+  }, [searchQuery, pageParam]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const handleSearch = async (e?: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-    const term = searchTerm.trim();
-    if (term === '' && term !== '') return;
-    localStorage.setItem('lastSearch', term);
-    await loadResults(term);
+    setSearchParams({ search: draft, page: '1' });
   };
-
-  useEffect(() => {
-    const saved = localStorage.getItem('lastSearch') || '';
-    setSearchTerm(saved);
-    loadResults(saved, true);
-  }, [loadResults]);
 
   return (
     <ErrorBoundary>
       <SearchControls
-        searchTerm={searchTerm}
-        onInputChange={handleInputChange}
-        onSearch={handleSearch}
+        searchTerm={draft}
+        onInputChange={(e) => setDraft(e.target.value)}
+        onSearch={handleSubmit}
         loading={loading}
         error={error}
-        onRetry={() => loadResults(searchTerm.trim(), true)}
+        onRetry={() => setSearchParams({ search: draft, page: '1' })}
       />
+
       <SearchResult history={history} loading={loading} />
+
+      {history.length > 0 && (
+        <div className="pagination">
+          <button
+            onClick={() =>
+              setSearchParams({
+                search: searchQuery,
+                page: String(pageParam - 1),
+              })
+            }
+            disabled={pageParam <= 1}
+          >
+            Prev
+          </button>
+
+          <span>Page {pageParam}</span>
+
+          <button
+            onClick={() =>
+              setSearchParams({
+                search: searchQuery,
+                page: String(pageParam + 1),
+              })
+            }
+            disabled={history.length < pageSize}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
       <button className="crash-button" onClick={() => setCrash(true)}>
         Crash App!
       </button>

@@ -1,5 +1,6 @@
 import {
   useNavigate as _useNavigate,
+  useLocation,
   type NavigateFunction,
 } from 'react-router-dom';
 import type { PokemonWithDescription } from '../interface/interface';
@@ -14,8 +15,9 @@ function useSaveNavigate(): NavigateFunction {
 }
 export function PokemonCardRow({ name, description }: PokemonWithDescription) {
   const navigate = useSaveNavigate();
+  const { search } = useLocation();
   const onClick = () => {
-    navigate(`${PATHS.DETAILS}/${name}`);
+    navigate(`${PATHS.DETAILS}/${name}${search}`);
   };
 
   return (
