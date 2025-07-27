@@ -7,26 +7,27 @@ import { fetchPokemonByName, fetchPokemonList } from './servise/pokeApi';
 import { ErrorBoundary } from './errorCatching/ErrorBoundary';
 import { Bomb } from './errorCatching/CrashButton';
 
+import { useSearchQuery } from './hooks/useSearchQuery';
+
 export const App: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const rawSearch = searchParams.get('search');
-  const pageParam = parseInt(searchParams.get('page') ?? '1', 10);
+  const [searchQuery, setSearchQuery] = useSearchQuery();
+
+  const [params, setParams] = useSearchParams();
+  const pageParam = parseInt(params.get('page') ?? '1', 10);
   const pageSize = 5;
 
-  const searchQuery =
-    rawSearch !== null ? rawSearch : (localStorage.getItem('lastSearch') ?? '');
-
   const [draft, setDraft] = useState(searchQuery);
+
+  useEffect(() => {
+    setDraft(searchQuery);
+  }, [searchQuery]);
+
   const [history, setHistory] = useState<
     Array<{ name: string; description: string }>
   >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [crash, setCrash] = useState(false);
-
-  useEffect(() => {
-    setDraft(searchQuery);
-  }, [searchQuery]);
 
   const fetchList = async () => {
     setLoading(true);
@@ -68,12 +69,15 @@ export const App: React.FC = () => {
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-    localStorage.setItem('lastSearch', draft);
-    setSearchParams({ search: draft, page: '1' });
+    setSearchQuery(draft);
   };
   const handleRetry = () => {
     if (searchQuery === '') fetchList();
     else fetchSingle();
+  };
+
+  const goPage = (newPage: number) => {
+    setParams({ search: searchQuery, page: String(newPage) });
   };
 
   return (
@@ -93,18 +97,14 @@ export const App: React.FC = () => {
         <div className="pagination">
           <button
             disabled={pageParam <= 1}
-            onClick={() =>
-              setSearchParams({ search: '', page: String(pageParam - 1) })
-            }
+            onClick={() => goPage(pageParam - 1)}
           >
             Prev
           </button>
           <span>Page {pageParam}</span>
           <button
             disabled={history.length < pageSize}
-            onClick={() =>
-              setSearchParams({ search: '', page: String(pageParam + 1) })
-            }
+            onClick={() => goPage(pageParam + 1)}
           >
             Next
           </button>
