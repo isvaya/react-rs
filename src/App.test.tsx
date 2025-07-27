@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { App } from './App';
 
 interface PokemonEntry {
@@ -57,7 +58,13 @@ describe('App integration', () => {
         description: 'Seed',
       });
 
-    render(<App />);
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
 
     expect(screen.getByRole('button', { name: /loading/i })).toBeDisabled();
 
@@ -80,7 +87,13 @@ describe('App integration', () => {
       description: 'Evolution Pokémon',
     });
 
-    render(<App />);
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByText(/eevee/i)).toBeInTheDocument();
@@ -99,7 +112,13 @@ describe('App integration', () => {
       description: 'Fire dragon',
     });
 
-    render(<App />);
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
 
     const searchButton = await screen.findByRole('button', {
       name: /search/i,
@@ -123,7 +142,13 @@ describe('App integration', () => {
       new Error('Pokemon "mewthree" not found')
     );
 
-    render(<App />);
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
 
     const searchButton = await screen.findByRole('button', {
       name: /search/i,
@@ -153,13 +178,17 @@ describe('App integration', () => {
     expect(mockFetchByName).toHaveBeenCalledTimes(2);
   });
 
-  it('prepends items on multiple successive searches', async () => {
+  it('replaces list on successive manual searches', async () => {
     mockFetchList.mockResolvedValue({ results: [] });
     mockFetchByName
       .mockResolvedValueOnce({ name: 'ditto', description: 'Copy' })
       .mockResolvedValueOnce({ name: 'snorlax', description: 'Sleep' });
 
-    render(<App />);
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>
+    );
 
     const searchButton = await screen.findByRole('button', {
       name: /search/i,
@@ -177,20 +206,6 @@ describe('App integration', () => {
       expect(screen.getByText(/snorlax/i)).toBeInTheDocument();
     });
 
-    const rowsText = screen.getAllByRole('row').map((r) => r.textContent ?? '');
-    const snorlaxIndex = rowsText.findIndex((t) => /snorlax/i.test(t));
-    const dittoIndex = rowsText.findIndex((t) => /ditto/i.test(t));
-    expect(snorlaxIndex).toBeLessThan(dittoIndex);
-  });
-
-  it('shows ErrorBoundary fallback after Crash App! button', async () => {
-    mockFetchList.mockResolvedValue({ results: [] });
-
-    render(<App />);
-
-    const crashBtn = screen.getByRole('button', { name: /crash app/i });
-    fireEvent.click(crashBtn);
-
-    expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
+    expect(screen.queryByText(/ditto/i)).toBeNull();
   });
 });

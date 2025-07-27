@@ -9,9 +9,12 @@ import { Bomb } from './errorCatching/CrashButton';
 
 export const App: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const searchQuery = searchParams.get('search') ?? '';
+  const rawSearch = searchParams.get('search');
   const pageParam = parseInt(searchParams.get('page') ?? '1', 10);
   const pageSize = 5;
+
+  const searchQuery =
+    rawSearch !== null ? rawSearch : (localStorage.getItem('lastSearch') ?? '');
 
   const [draft, setDraft] = useState(searchQuery);
   const [history, setHistory] = useState<
@@ -25,35 +28,52 @@ export const App: React.FC = () => {
     setDraft(searchQuery);
   }, [searchQuery]);
 
-  useEffect(() => {
+  const fetchList = async () => {
     setLoading(true);
     setError(null);
+    try {
+      const offset = (pageParam - 1) * pageSize;
+      const list = await fetchPokemonList(pageSize, offset);
+      const pages = await Promise.all(
+        list.results.map((r) => fetchPokemonByName(r.name))
+      );
+      setHistory(pages);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    (async () => {
-      try {
-        let entries: Array<{ name: string; description: string }>;
-        if (searchQuery === '') {
-          const offset = (pageParam - 1) * pageSize;
-          const list = await fetchPokemonList(pageSize, offset);
-          entries = await Promise.all(
-            list.results.map((r) => fetchPokemonByName(r.name))
-          );
-        } else {
-          const single = await fetchPokemonByName(searchQuery);
-          entries = [single];
-        }
-        setHistory(entries);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
-      } finally {
-        setLoading(false);
-      }
-    })();
+  const fetchSingle = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const single = await fetchPokemonByName(searchQuery);
+      setHistory([single]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (searchQuery === '') {
+      fetchList();
+    } else {
+      fetchSingle();
+    }
   }, [searchQuery, pageParam]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
+    localStorage.setItem('lastSearch', draft);
     setSearchParams({ search: draft, page: '1' });
+  };
+  const handleRetry = () => {
+    if (searchQuery === '') fetchList();
+    else fetchSingle();
   };
 
   return (
@@ -64,35 +84,27 @@ export const App: React.FC = () => {
         onSearch={handleSubmit}
         loading={loading}
         error={error}
-        onRetry={() => setSearchParams({ search: draft, page: '1' })}
+        onRetry={handleRetry}
       />
 
       <SearchResult history={history} loading={loading} />
 
-      {history.length > 0 && (
+      {searchQuery === '' && history.length > 0 && (
         <div className="pagination">
           <button
-            onClick={() =>
-              setSearchParams({
-                search: searchQuery,
-                page: String(pageParam - 1),
-              })
-            }
             disabled={pageParam <= 1}
+            onClick={() =>
+              setSearchParams({ search: '', page: String(pageParam - 1) })
+            }
           >
             Prev
           </button>
-
           <span>Page {pageParam}</span>
-
           <button
-            onClick={() =>
-              setSearchParams({
-                search: searchQuery,
-                page: String(pageParam + 1),
-              })
-            }
             disabled={history.length < pageSize}
+            onClick={() =>
+              setSearchParams({ search: '', page: String(pageParam + 1) })
+            }
           >
             Next
           </button>
