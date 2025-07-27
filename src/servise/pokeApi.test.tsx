@@ -4,6 +4,12 @@ import {
   fetchPokemonDescription,
   fetchPokemonByName,
 } from './pokeApi';
+import type {
+  PokemonApiResponse,
+  PokemonSpeciesResponse,
+  PokemonDetail,
+} from '../interface/interface';
+import { fetchPokemonDetail } from './pokeApi';
 
 type JsonValue = unknown;
 interface MockResponse {
@@ -169,5 +175,163 @@ describe('fetchPokemonByName', () => {
     await expect(fetchPokemonByName('missingmon')).rejects.toThrow(
       /Pokemon "missingmon" not found/
     );
+  });
+});
+
+describe('fetchPokemonDetail', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns full detail with official artwork', async () => {
+    vi.useFakeTimers();
+
+    const apiRes: PokemonApiResponse = {
+      name: 'pikachu',
+      species: { url: 'https://pokeapi.co/api/v2/pokemon-species/25/' },
+      sprites: {
+        other: { 'official-artwork': { front_default: 'art.png' } },
+        front_default: 'front.png',
+      },
+      abilities: [{ ability: { name: 'static' } }],
+      types: [{ type: { name: 'electric' } }],
+      stats: [{ stat: { name: 'speed' }, base_stat: 90 }],
+    };
+
+    const speciesRes: PokemonSpeciesResponse = {
+      flavor_text_entries: [
+        { flavor_text: 'Electric mouse', language: { name: 'en' } },
+        { flavor_text: 'Мышь', language: { name: 'ru' } },
+      ],
+    };
+
+    const fetchMock = mockFetch([
+      { ok: true, status: 200, json: async () => apiRes },
+      { ok: true, status: 200, json: async () => speciesRes },
+    ]);
+
+    const promise = fetchPokemonDetail('pikachu');
+    vi.advanceTimersByTime(1500);
+
+    const detail: PokemonDetail = await promise;
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    expect(detail).toEqual({
+      name: 'pikachu',
+      image: 'art.png',
+      description: 'Electric mouse',
+      abilities: ['static'],
+      types: ['electric'],
+      stats: [{ name: 'speed', value: 90 }],
+    });
+  });
+
+  it('falls back to front_default if official artwork missing', async () => {
+    vi.useFakeTimers();
+
+    const apiRes: PokemonApiResponse = {
+      name: 'eevee',
+      species: { url: 'url-species' },
+      sprites: {
+        other: {},
+        front_default: 'front.png',
+      },
+      abilities: [{ ability: { name: 'run-away' } }],
+      types: [{ type: { name: 'normal' } }],
+      stats: [{ stat: { name: 'hp' }, base_stat: 55 }],
+    };
+    const speciesRes: PokemonSpeciesResponse = {
+      flavor_text_entries: [
+        { flavor_text: 'Evolution Pokémon', language: { name: 'en' } },
+      ],
+    };
+
+    mockFetch([
+      { ok: true, status: 200, json: async () => apiRes },
+      { ok: true, status: 200, json: async () => speciesRes },
+    ]);
+
+    const promise = fetchPokemonDetail('eevee');
+    vi.advanceTimersByTime(1500);
+    const detail = await promise;
+
+    expect(detail.image).toBe('front.png');
+  });
+
+  it('uses front_default when official-artwork is missing', async () => {
+    vi.useFakeTimers();
+
+    const apiRes: PokemonApiResponse = {
+      name: 'eevee',
+      species: { url: 'url-species' },
+      sprites: {
+        other: undefined,
+        front_default: 'front.png',
+      },
+      abilities: [{ ability: { name: 'run-away' } }],
+      types: [{ type: { name: 'normal' } }],
+      stats: [{ stat: { name: 'hp' }, base_stat: 55 }],
+    };
+
+    const speciesRes: PokemonSpeciesResponse = {
+      flavor_text_entries: [
+        { flavor_text: 'Evolution Pokémon', language: { name: 'en' } },
+      ],
+    };
+
+    mockFetch([
+      { ok: true, status: 200, json: async () => apiRes },
+      { ok: true, status: 200, json: async () => speciesRes },
+    ]);
+
+    const promise = fetchPokemonDetail('eevee');
+    vi.advanceTimersByTime(1500);
+    const detail = await promise;
+
+    expect(detail.image).toBe('front.png');
+  });
+
+  it('throws if first fetch (getJSON) fails', async () => {
+    vi.useFakeTimers();
+    mockFetch([{ ok: false, status: 404, json: async () => ({}) }]);
+
+    const promise = fetchPokemonDetail('none');
+    vi.advanceTimersByTime(1500);
+
+    await expect(promise).rejects.toThrow(/Network error: 404/);
+  });
+
+  it('falls back to empty string when no sprites at all', async () => {
+    vi.useFakeTimers();
+
+    const apiRes: PokemonApiResponse = {
+      name: 'missingno',
+      species: { url: 'url-species' },
+      sprites: {
+        other: undefined,
+        front_default: null,
+      },
+      abilities: [],
+      types: [],
+      stats: [],
+    };
+
+    const speciesRes: PokemonSpeciesResponse = {
+      flavor_text_entries: [
+        { flavor_text: 'Glitch', language: { name: 'en' } },
+      ],
+    };
+
+    mockFetch([
+      { ok: true, status: 200, json: async () => apiRes },
+      { ok: true, status: 200, json: async () => speciesRes },
+    ]);
+
+    const promise = fetchPokemonDetail('missingno');
+    vi.advanceTimersByTime(1500);
+    const detail = await promise;
+
+    expect(detail.image).toBe('');
   });
 });
