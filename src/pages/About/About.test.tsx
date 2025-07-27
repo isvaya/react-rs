@@ -1,4 +1,3 @@
-// src/pages/About/About.test.tsx
 import { describe, beforeEach, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { About } from './About';
@@ -29,7 +28,7 @@ describe('About page', () => {
   });
 
   it('renders all four about-text paragraphs', () => {
-    const paras = screen.getAllByText((content, elem) => {
+    const paras = screen.getAllByText((_, elem) => {
       return (
         elem?.tagName.toLowerCase() === 'p' &&
         elem.classList.contains('about-text')
