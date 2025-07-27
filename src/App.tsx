@@ -1,90 +1,120 @@
 import './App.css';
-import type { SearchPokemonState } from './interface/interface';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { SearchControls } from './top-controlls/SearchInput';
 import { SearchResult } from './result/SearchResults';
 import { fetchPokemonByName, fetchPokemonList } from './servise/pokeApi';
 import { ErrorBoundary } from './errorCatching/ErrorBoundary';
 import { Bomb } from './errorCatching/CrashButton';
 
-export class App extends React.Component<unknown, SearchPokemonState> {
-  state: SearchPokemonState = {
-    searchTerm: '',
-    history: [],
-    loading: false,
-    error: null,
-    crash: false,
-  };
+import { useSearchQuery } from './hooks/useSearchQuery';
 
-  private loadResults = async (term: string, resetHistory = false) => {
-    this.setState({ loading: true, error: null });
+export const App: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useSearchQuery();
 
+  const [params, setParams] = useSearchParams();
+  const pageParam = parseInt(params.get('page') ?? '1', 10);
+  const pageSize = 5;
+
+  const [draft, setDraft] = useState(searchQuery);
+
+  useEffect(() => {
+    setDraft(searchQuery);
+  }, [searchQuery]);
+
+  const [history, setHistory] = useState<
+    Array<{ name: string; description: string }>
+  >([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [crash, setCrash] = useState(false);
+
+  const fetchList = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      let entries: { name: string; description: string }[];
-
-      if (term === '') {
-        const list = await fetchPokemonList(20, 0);
-        entries = await Promise.all(
-          list.results.map((r) => fetchPokemonByName(r.name))
-        );
-      } else {
-        const single = await fetchPokemonByName(term);
-        entries = [single];
-      }
-
-      this.setState((prev) => ({
-        history: resetHistory ? entries : [...entries, ...prev.history],
-        loading: false,
-      }));
+      const offset = (pageParam - 1) * pageSize;
+      const list = await fetchPokemonList(pageSize, offset);
+      const pages = await Promise.all(
+        list.results.map((r) => fetchPokemonByName(r.name))
+      );
+      setHistory(pages);
     } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      this.setState({ error: message, loading: false });
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
     }
   };
 
-  private handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ searchTerm: e.target.value });
+  const fetchSingle = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const single = await fetchPokemonByName(searchQuery);
+      setHistory([single]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  private handleSearch = async (e?: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (searchQuery === '') {
+      fetchList();
+    } else {
+      fetchSingle();
+    }
+  }, [searchQuery, pageParam]);
+
+  const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-    const term = this.state.searchTerm.trim();
-
-    if (!term && term !== '') return;
-    localStorage.setItem('lastSearch', term);
-    await this.loadResults(term);
+    setSearchQuery(draft);
+  };
+  const handleRetry = () => {
+    if (searchQuery === '') fetchList();
+    else fetchSingle();
   };
 
-  componentDidMount() {
-    const saved = localStorage.getItem('lastSearch') || '';
-    this.setState({ searchTerm: saved }, () => {
-      this.loadResults(saved, true);
-    });
-  }
+  const goPage = (newPage: number) => {
+    setParams({ search: searchQuery, page: String(newPage) });
+  };
 
-  render() {
-    return (
-      <ErrorBoundary>
-        <SearchControls
-          searchTerm={this.state.searchTerm}
-          onInputChange={this.handleInputChange}
-          onSearch={this.handleSearch}
-          loading={this.state.loading}
-          error={this.state.error}
-          onRetry={() => this.loadResults(this.state.searchTerm.trim(), true)}
-        />
-        <SearchResult
-          history={this.state.history}
-          loading={this.state.loading}
-        />
-        <button
-          className="crash-button"
-          onClick={() => this.setState({ crash: true })}
-        >
-          Crash App!
-        </button>
-        {this.state.crash && <Bomb />}
-      </ErrorBoundary>
-    );
-  }
-}
+  return (
+    <ErrorBoundary>
+      <SearchControls
+        searchTerm={draft}
+        onInputChange={(e) => setDraft(e.target.value)}
+        onSearch={handleSubmit}
+        loading={loading}
+        error={error}
+        onRetry={handleRetry}
+      />
+
+      <SearchResult history={history} loading={loading} />
+
+      {searchQuery === '' && history.length > 0 && (
+        <div className="pagination">
+          <button
+            disabled={pageParam <= 1}
+            onClick={() => goPage(pageParam - 1)}
+          >
+            Prev
+          </button>
+          <span>Page {pageParam}</span>
+          <button
+            disabled={history.length < pageSize}
+            onClick={() => goPage(pageParam + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      <button className="crash-button" onClick={() => setCrash(true)}>
+        Crash App!
+      </button>
+      {crash && <Bomb />}
+    </ErrorBoundary>
+  );
+};

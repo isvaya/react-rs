@@ -1,6 +1,8 @@
 import type {
   PokemonListResponse,
   PokemonSpeciesResponse,
+  PokemonDetail,
+  PokemonApiResponse,
 } from '../interface/interface';
 
 export async function fetchPokemonList(
@@ -43,4 +45,44 @@ export async function fetchPokemonByName(
   } catch {
     throw new Error(`Pokemon "${name}" not found`);
   }
+}
+
+async function getJSON<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Network error: ${res.status}`);
+  return (await res.json()) as T;
+}
+
+export async function fetchPokemonDetail(name: string): Promise<PokemonDetail> {
+  await new Promise((res) => setTimeout(res, 1500));
+
+  const p = await getJSON<PokemonApiResponse>(
+    `https://pokeapi.co/api/v2/pokemon/${name}`
+  );
+
+  const s = await getJSON<PokemonSpeciesResponse>(p.species.url);
+  const entry = s.flavor_text_entries.find((e) => e.language.name === 'en');
+  const description = entry
+    ? entry.flavor_text.replace(/\s+/g, ' ')
+    : 'No description available';
+
+  const artUrl =
+    p.sprites.other?.['official-artwork']?.front_default ||
+    p.sprites.front_default ||
+    '';
+
+  return {
+    name: p.name,
+    image: artUrl,
+
+    abilities: p.abilities.map((a) => a.ability.name),
+    types: p.types.map((t) => t.type.name),
+
+    stats: p.stats.map((st) => ({
+      name: st.stat.name,
+      value: st.base_stat,
+    })),
+
+    description,
+  };
 }
