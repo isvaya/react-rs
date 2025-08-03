@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { fetchPokemonList, fetchPokemonByName } from '../servise/pokeApi';
 import type { PokemonWithDescription } from '../interface/interface';
 
-interface PokemonState {
+export interface PokemonState {
   loading: boolean;
   error: string | null;
   searchTerm: string;

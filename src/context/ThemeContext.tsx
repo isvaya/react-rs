@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 export type Theme = 'light' | 'dark';
 
-interface ThemeContextType {
+export interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
 }
