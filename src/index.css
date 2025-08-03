@@ -4,8 +4,6 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,7 +11,49 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root.dark {
+  --bg: #fff;
+  --text: #222;
+
+  --btn-bg: #df8eda;
+  --btn-text: #222;
+  --btn-hover-border: #242424;
+
+  --header-item-a-color: #222;
+  --header-border-bottom: rgba(51, 50, 50, 0.5);
+
+  --detail-view-border-left-color: rgba(39, 38, 38, 0.5);
+
+  --footer-border0top-color: rgba(39, 38, 38, 0.5);
+  --footer-text-a: rgb(30, 30, 30);
+
+  --search-input-bg: #fff;
+  --checkbox-bg: #fff;
+}
+
+:root.light {
+  --bg: #242424;
+  --text: rgba(255, 255, 255, 0.87);
+
+  --btn-bg: #1a1a1a;
+  --btn-text: #e06bf2;
+  --btn-hover-border: #e06bf2;
+  --btn-hover-text: #e06bf2;
+
+  --header-item-a-color: #fff;
+  --header-border-bottom: rgba(255, 255, 255, 0.5);
+
+  --detail-view-border-left-color: rgba(255, 255, 255, 0.5);
+  --footer-border0top-color: rgba(255, 255, 255, 0.5);
+  --footer-text-a: azure;
+
+  --search-input-bg: inherit;
+  --checkbox-bg: inherit;
+}
+
 body {
+  background: var(--bg);
+  color: var(--text);
   margin: 0;
   display: flex;
   place-items: center;
@@ -27,19 +67,20 @@ h1 {
 }
 
 button {
+  color: var(--btn-text);
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid var(--btn-hover-border);
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--btn-bg);
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #5d1b67;
-  color: #e06bf2;
+  border-color: var(--btn-hover-border);
+  color: var(--btn-hover-text);
 }
 button:focus,
 button:focus-visible {

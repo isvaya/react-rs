@@ -37,6 +37,7 @@ export function PokemonCardRow({ name, description }: PokemonWithDescription) {
     <tr className="tr-results" onClick={onClick}>
       <td>
         <input
+          className="checkbox"
           type="checkbox"
           checked={selected}
           onChange={() => toggleSelect({ name, description })}
