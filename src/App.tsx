@@ -8,6 +8,7 @@ import { ErrorBoundary } from './errorCatching/ErrorBoundary';
 import { Bomb } from './errorCatching/CrashButton';
 
 import { useSearchQuery } from './hooks/useSearchQuery';
+import { SelectionPopup } from './components/SelectionPopup/SelectionPopup';
 
 export const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useSearchQuery();
@@ -110,7 +111,7 @@ export const App: React.FC = () => {
           </button>
         </div>
       )}
-
+      <SelectionPopup />
       <button className="crash-button" onClick={() => setCrash(true)}>
         Crash App!
       </button>

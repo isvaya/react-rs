@@ -21,6 +21,7 @@ export const SearchResult: React.FC<SearchResultsProps> = ({
         <table>
           <thead>
             <tr className="tr-results">
+              <th className="select">Select</th>
               <th className="name">Pokémon&apos;s name</th>
               <th className="description">Pokémon&apos;s description</th>
             </tr>
