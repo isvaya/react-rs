@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { ThemeProvider } from '../context/ThemeContext';
 import { AppRoutes } from './Router';
 import { PATHS } from '../enums/enum';
 
@@ -8,7 +9,9 @@ describe('AppRoutes', () => {
   it('renders the main App page at PATHS.MAIN', () => {
     render(
       <MemoryRouter initialEntries={[PATHS.MAIN]}>
-        <AppRoutes />
+        <ThemeProvider>
+          <AppRoutes />
+        </ThemeProvider>
       </MemoryRouter>
     );
     expect(
@@ -19,7 +22,9 @@ describe('AppRoutes', () => {
   it('renders the About page at PATHS.ABOUT', () => {
     render(
       <MemoryRouter initialEntries={[PATHS.ABOUT]}>
-        <AppRoutes />
+        <ThemeProvider>
+          <AppRoutes />
+        </ThemeProvider>
       </MemoryRouter>
     );
     expect(
@@ -30,7 +35,9 @@ describe('AppRoutes', () => {
   it('renders the NotFound page for an unknown path', () => {
     render(
       <MemoryRouter initialEntries={['/this-does-not-exist']}>
-        <AppRoutes />
+        <ThemeProvider>
+          <AppRoutes />
+        </ThemeProvider>
       </MemoryRouter>
     );
     expect(screen.getByText('404')).toBeInTheDocument();

@@ -5,6 +5,7 @@ import {
 } from 'react-router-dom';
 import type { PokemonWithDescription } from '../interface/interface';
 import { PATHS } from '../enums/enum';
+import { usePokemonStore } from '../store/usePokemonStore';
 
 function useSaveNavigate(): NavigateFunction {
   try {
@@ -26,14 +27,28 @@ function useSafeLocation(): Pick<Location, 'search'> {
 export function PokemonCardRow({ name, description }: PokemonWithDescription) {
   const navigate = useSaveNavigate();
   const { search } = useSafeLocation();
+  const toggleSelect = usePokemonStore((s) => s.toggleSelect);
+  const selected = usePokemonStore((s) => !!s.selected[name]);
   const onClick = () => {
     navigate(`${PATHS.DETAILS}/${name}${search}`);
   };
 
   return (
     <tr className="tr-results" onClick={onClick}>
-      <td className="name-result">{name}</td>
-      <td className="description-result">{description}</td>
+      <td>
+        <input
+          className="checkbox"
+          type="checkbox"
+          checked={selected}
+          onChange={() => toggleSelect({ name, description })}
+        />
+      </td>
+      <td className="name-result" onClick={onClick}>
+        {name}
+      </td>
+      <td className="description-result" onClick={onClick}>
+        {description}
+      </td>
     </tr>
   );
 }

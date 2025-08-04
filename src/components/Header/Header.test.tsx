@@ -1,6 +1,7 @@
 import { describe, it, beforeEach, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { ThemeProvider } from '../../context/ThemeContext';
 import { Header } from './Header';
 import { PATHS } from '../../enums/enum';
 
@@ -8,7 +9,9 @@ describe('Header component', () => {
   beforeEach(() => {
     render(
       <MemoryRouter>
-        <Header />
+        <ThemeProvider>
+          <Header />
+        </ThemeProvider>
       </MemoryRouter>
     );
   });
