@@ -2,6 +2,7 @@ import './App.css';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useQueries } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { SearchControls } from './top-controlls/SearchInput';
 import { SearchResult } from './result/SearchResults';
 import { fetchPokemonByName, fetchPokemonList } from './servise/pokeApi';
@@ -14,6 +15,7 @@ import { SelectionPopup } from './components/SelectionPopup/SelectionPopup';
 import type { PokemonListResponse } from './interface/interface';
 
 export const App: React.FC = () => {
+  const qc = useQueryClient();
   const [crash, setCrash] = useState(false);
 
   const [searchQuery, setSearchQuery] = useSearchQuery();
@@ -29,6 +31,8 @@ export const App: React.FC = () => {
   const listQuery = useQuery<PokemonListResponse, Error>({
     queryKey: ['pokemonList', pageParam],
     queryFn: () => fetchPokemonList(pageSize, (pageParam - 1) * pageSize),
+    enabled: searchQuery === '',
+    staleTime: 1000 * 60 * 5,
   });
 
   const detailQueries = useQueries({
@@ -113,6 +117,23 @@ export const App: React.FC = () => {
       )}
 
       <SelectionPopup />
+
+      <div className="controls">
+        <button
+          onClick={() => qc.invalidateQueries({ queryKey: ['pokemonList'] })}
+        >
+          Update list
+        </button>
+        {searchQuery && (
+          <button
+            onClick={() =>
+              qc.invalidateQueries({ queryKey: ['pokemon', searchQuery] })
+            }
+          >
+            Update {searchQuery}
+          </button>
+        )}
+      </div>
 
       <button className="crash-button" onClick={() => setCrash(true)}>
         Crash App!

@@ -33,6 +33,7 @@
   font-size: 18px;
   width: 70%;
   background-color: var(--search-input-bg);
+  color: var(--search-input-text);
 }
 
 .search-button {

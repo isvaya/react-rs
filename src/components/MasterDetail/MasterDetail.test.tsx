@@ -6,12 +6,15 @@ import { Details } from './MasterDetail';
 import { fetchPokemonDetail } from '../../servise/pokeApi';
 import { PATHS } from '../../enums/enum';
 import type { Mock } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('../../servise/pokeApi', () => ({
   fetchPokemonDetail: vi.fn(),
 }));
 
 describe('Details (Master-Detail) component', () => {
+  let queryClient: QueryClient;
+
   const mockDetail = {
     name: 'pikachu',
     image: 'pikachu.png',
@@ -26,20 +29,33 @@ describe('Details (Master-Detail) component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // queryClient.clear();
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
   });
+
+  const renderWithClient = (path: string) =>
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            <Route path={`${PATHS.DETAILS}/:name`} element={<Details />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
 
   it('shows loading indicator while fetching', () => {
     (fetchPokemonDetail as unknown as Mock).mockImplementation(
       () => new Promise(() => {})
     );
 
-    const { container } = render(
-      <MemoryRouter initialEntries={[`${PATHS.DETAILS}/pikachu`]}>
-        <Routes>
-          <Route path={`${PATHS.DETAILS}/:name`} element={<Details />} />
-        </Routes>
-      </MemoryRouter>
-    );
+    const { container } = renderWithClient(`${PATHS.DETAILS}/pikachu`);
 
     expect(container.querySelector('.progress-container')).toBeInTheDocument();
     expect(container.querySelector('.progress-bar')).toBeInTheDocument();
@@ -50,13 +66,7 @@ describe('Details (Master-Detail) component', () => {
       new Error('Not found')
     );
 
-    render(
-      <MemoryRouter initialEntries={[`${PATHS.DETAILS}/missingmon`]}>
-        <Routes>
-          <Route path={`${PATHS.DETAILS}/:name`} element={<Details />} />
-        </Routes>
-      </MemoryRouter>
-    );
+    renderWithClient(`${PATHS.DETAILS}/missingmon`);
 
     await waitFor(() => {
       expect(screen.getByText('Not found')).toBeInTheDocument();
@@ -66,13 +76,7 @@ describe('Details (Master-Detail) component', () => {
   it('renders full details on success', async () => {
     (fetchPokemonDetail as unknown as Mock).mockResolvedValue(mockDetail);
 
-    render(
-      <MemoryRouter initialEntries={[`${PATHS.DETAILS}/pikachu`]}>
-        <Routes>
-          <Route path={`${PATHS.DETAILS}/:name`} element={<Details />} />
-        </Routes>
-      </MemoryRouter>
-    );
+    renderWithClient(`${PATHS.DETAILS}/pikachu`);
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(

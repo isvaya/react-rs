@@ -12,7 +12,15 @@ if (!rootElement) {
   throw new Error('Root element not found');
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchInterval: 1000 * 60 * 10,
+    },
+  },
+});
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
