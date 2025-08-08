@@ -40,6 +40,7 @@ export function PokemonCardRow({ name, description }: PokemonWithDescription) {
           className="checkbox"
           type="checkbox"
           checked={selected}
+          onClick={(e) => e.stopPropagation()}
           onChange={() => toggleSelect({ name, description })}
         />
       </td>

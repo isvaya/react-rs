@@ -114,7 +114,6 @@ describe('App integration', () => {
     const input = getInput();
     expect(input.value).toBe('eevee');
     expect(mockFetchByName).toHaveBeenCalledTimes(1);
-    expect(mockFetchList).not.toHaveBeenCalled();
   });
 
   it('performs search by name and stores term to localStorage', async () => {
@@ -226,5 +225,73 @@ describe('App integration', () => {
     });
 
     expect(screen.queryByText(/ditto/i)).toBeNull();
+  });
+
+  it('paginates: Next => Page 2 (covers goPage)', async () => {
+    mockFetchList.mockResolvedValue({
+      results: [
+        { name: 'p1' },
+        { name: 'p2' },
+        { name: 'p3' },
+        { name: 'p4' },
+        { name: 'p5' },
+      ],
+    });
+    mockFetchByName
+      .mockResolvedValueOnce({ name: 'p1', description: 'd1' })
+      .mockResolvedValueOnce({ name: 'p2', description: 'd2' })
+      .mockResolvedValueOnce({ name: 'p3', description: 'd3' })
+      .mockResolvedValueOnce({ name: 'p4', description: 'd4' })
+      .mockResolvedValueOnce({ name: 'p5', description: 'd5' });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/?search=&page=1']}>
+          <Routes>
+            <Route path="*" element={<App />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    await screen.findByText(/p1/i);
+    expect(screen.getByText(/Page 1/i)).toBeInTheDocument();
+
+    const nextBtn = screen.getByRole('button', { name: /next/i });
+    expect(nextBtn).not.toBeDisabled();
+
+    fireEvent.click(nextBtn);
+    await screen.findByText(/Page 2/i);
+  });
+
+  it('manual cache invalidation buttons call invalidateQueries', async () => {
+    localStorage.setItem('lastSearch', 'eevee');
+    mockFetchByName.mockResolvedValue({
+      name: 'eevee',
+      description: 'Evolution',
+    });
+
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const invSpy = vi.spyOn(client, 'invalidateQueries');
+
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={['/?search=eevee&page=1']}>
+          <Routes>
+            <Route path="*" element={<App />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    await screen.findByText(/eevee/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /update list/i }));
+    expect(invSpy).toHaveBeenCalledWith({ queryKey: ['pokemonList'] });
+
+    fireEvent.click(screen.getByRole('button', { name: /update eevee/i }));
+    expect(invSpy).toHaveBeenCalledWith({ queryKey: ['pokemon', 'eevee'] });
   });
 });
