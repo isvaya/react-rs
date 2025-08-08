@@ -4,15 +4,19 @@ import { MemoryRouter } from 'react-router-dom';
 import { ThemeProvider } from '../context/ThemeContext';
 import { AppRoutes } from './Router';
 import { PATHS } from '../enums/enum';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 describe('AppRoutes', () => {
   it('renders the main App page at PATHS.MAIN', () => {
+    const qc = new QueryClient();
     render(
-      <MemoryRouter initialEntries={[PATHS.MAIN]}>
-        <ThemeProvider>
-          <AppRoutes />
-        </ThemeProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={[PATHS.MAIN]}>
+          <ThemeProvider>
+            <AppRoutes />
+          </ThemeProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
     expect(
       screen.getByPlaceholderText(/Search full name of Pokemon/i)

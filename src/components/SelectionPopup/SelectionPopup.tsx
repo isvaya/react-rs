@@ -22,7 +22,9 @@ export const SelectionPopup: React.FC = () => {
     a.href = url;
     a.download = `${items.length}_items.csv`;
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
   };
 
   return (

@@ -1,6 +1,8 @@
 import './App.css';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useQuery, useQueries } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { SearchControls } from './top-controlls/SearchInput';
 import { SearchResult } from './result/SearchResults';
 import { fetchPokemonByName, fetchPokemonList } from './servise/pokeApi';
@@ -10,71 +12,65 @@ import { Bomb } from './errorCatching/CrashButton';
 import { useSearchQuery } from './hooks/useSearchQuery';
 import { SelectionPopup } from './components/SelectionPopup/SelectionPopup';
 
-export const App: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useSearchQuery();
+import type { PokemonListResponse } from './interface/interface';
 
+export const App: React.FC = () => {
+  const qc = useQueryClient();
+  const [crash, setCrash] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useSearchQuery();
   const [params, setParams] = useSearchParams();
   const pageParam = parseInt(params.get('page') ?? '1', 10);
   const pageSize = 5;
 
   const [draft, setDraft] = useState(searchQuery);
-
   useEffect(() => {
     setDraft(searchQuery);
   }, [searchQuery]);
 
-  const [history, setHistory] = useState<
-    Array<{ name: string; description: string }>
-  >([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [crash, setCrash] = useState(false);
+  const listQuery = useQuery<PokemonListResponse, Error>({
+    queryKey: ['pokemonList', pageParam],
+    queryFn: () => fetchPokemonList(pageSize, (pageParam - 1) * pageSize),
+    enabled: searchQuery === '',
+    staleTime: 1000 * 60 * 5,
+  });
 
-  const fetchList = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const offset = (pageParam - 1) * pageSize;
-      const list = await fetchPokemonList(pageSize, offset);
-      const pages = await Promise.all(
-        list.results.map((r) => fetchPokemonByName(r.name))
-      );
-      setHistory(pages);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const detailQueries = useQueries({
+    queries: searchQuery
+      ? [
+          {
+            queryKey: ['pokemon', searchQuery] as const,
+            queryFn: () => fetchPokemonByName(searchQuery),
+          },
+        ]
+      : (listQuery.data?.results.map((r) => ({
+          queryKey: ['pokemon', r.name] as const,
+          queryFn: () => fetchPokemonByName(r.name),
+        })) ?? []),
+  });
 
-  const fetchSingle = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const single = await fetchPokemonByName(searchQuery);
-      setHistory([single]);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const isLoading =
+    listQuery.isLoading || detailQueries.some((q) => q.isLoading);
+  const error =
+    (listQuery.error as Error | null) ||
+    (detailQueries.find((q) => q.error)?.error as Error | null);
 
-  useEffect(() => {
-    if (searchQuery === '') {
-      fetchList();
-    } else {
-      fetchSingle();
-    }
-  }, [searchQuery, pageParam]);
+  const history = detailQueries
+    .map((q) => q.data)
+    .filter((d): d is { name: string; description: string } => Boolean(d));
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     setSearchQuery(draft);
+    setParams({ search: draft, page: '1' });
   };
+
   const handleRetry = () => {
-    if (searchQuery === '') fetchList();
-    else fetchSingle();
+    if (searchQuery) {
+      detailQueries.forEach((q) => q.refetch());
+    } else {
+      listQuery.refetch();
+    }
   };
 
   const goPage = (newPage: number) => {
@@ -87,14 +83,22 @@ export const App: React.FC = () => {
         searchTerm={draft}
         onInputChange={(e) => setDraft(e.target.value)}
         onSearch={handleSubmit}
-        loading={loading}
-        error={error}
+        loading={isLoading}
+        error={error ? error.message : null}
         onRetry={handleRetry}
       />
 
-      <SearchResult history={history} loading={loading} />
+      {isLoading && (
+        <div className="bottom-section">
+          <div className="spinner" />
+        </div>
+      )}
 
-      {searchQuery === '' && history.length > 0 && (
+      {!isLoading && history.length > 0 && (
+        <SearchResult history={history} loading={false} />
+      )}
+
+      {searchQuery === '' && listQuery.data && history.length > 0 && (
         <div className="pagination">
           <button
             disabled={pageParam <= 1}
@@ -111,7 +115,26 @@ export const App: React.FC = () => {
           </button>
         </div>
       )}
+
       <SelectionPopup />
+
+      <div className="controls">
+        <button
+          onClick={() => qc.invalidateQueries({ queryKey: ['pokemonList'] })}
+        >
+          Update list
+        </button>
+        {searchQuery && (
+          <button
+            onClick={() =>
+              qc.invalidateQueries({ queryKey: ['pokemon', searchQuery] })
+            }
+          >
+            Update {searchQuery}
+          </button>
+        )}
+      </div>
+
       <button className="crash-button" onClick={() => setCrash(true)}>
         Crash App!
       </button>

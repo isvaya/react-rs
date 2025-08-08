@@ -13,15 +13,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem('app-theme') as Theme) ?? 'light'
-  );
-
-  // useEffect(() => {
-  //   document.body.classList.remove(theme === 'light' ? 'dark' : 'light');
-  //   document.body.classList.add(theme);
-  //   localStorage.setItem('app-theme', theme);
-  // }, [theme]);
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem('app-theme');
+    return stored === 'dark' ? 'dark' : 'light';
+  });
 
   useEffect(() => {
     const root = document.documentElement;

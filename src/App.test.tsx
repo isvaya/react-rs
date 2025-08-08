@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { App } from './App';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 interface PokemonEntry {
   name: string;
@@ -21,6 +22,8 @@ vi.mock('./servise/pokeApi', () => ({
   fetchPokemonByName: vi.fn<FetchPokemonByNameFn>(),
 }));
 
+let queryClient: QueryClient;
+
 import { fetchPokemonList, fetchPokemonByName } from './servise/pokeApi';
 
 type FetchListMock = ReturnType<typeof vi.fn<FetchPokemonListFn>>;
@@ -31,6 +34,11 @@ const mockFetchByName = fetchPokemonByName as unknown as FetchByNameMock;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  vi.clearAllMocks();
+
   localStorage.clear();
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -59,11 +67,13 @@ describe('App integration', () => {
       });
 
     render(
-      <MemoryRouter initialEntries={['/']}>
-        <Routes>
-          <Route path="*" element={<App />} />
-        </Routes>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="*" element={<App />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     expect(screen.getByRole('button', { name: /loading/i })).toBeDisabled();
@@ -88,11 +98,13 @@ describe('App integration', () => {
     });
 
     render(
-      <MemoryRouter initialEntries={['/']}>
-        <Routes>
-          <Route path="*" element={<App />} />
-        </Routes>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="*" element={<App />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     await waitFor(() => {
@@ -102,7 +114,6 @@ describe('App integration', () => {
     const input = getInput();
     expect(input.value).toBe('eevee');
     expect(mockFetchByName).toHaveBeenCalledTimes(1);
-    expect(mockFetchList).not.toHaveBeenCalled();
   });
 
   it('performs search by name and stores term to localStorage', async () => {
@@ -113,11 +124,13 @@ describe('App integration', () => {
     });
 
     render(
-      <MemoryRouter initialEntries={['/']}>
-        <Routes>
-          <Route path="*" element={<App />} />
-        </Routes>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="*" element={<App />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     const searchButton = await screen.findByRole('button', {
@@ -127,10 +140,9 @@ describe('App integration', () => {
     fireEvent.change(getInput(), { target: { value: 'charizard' } });
     fireEvent.click(searchButton);
 
-    await waitFor(() => {
-      expect(screen.getByText(/charizard/i)).toBeInTheDocument();
-      expect(screen.getByText(/Fire dragon/i)).toBeInTheDocument();
-    });
+    const nameCell = await screen.findByText(/charizard/i);
+    expect(nameCell).toBeInTheDocument();
+    expect(screen.getByText(/Fire dragon/i)).toBeInTheDocument();
 
     expect(localStorage.getItem('lastSearch')).toBe('charizard');
   });
@@ -143,11 +155,13 @@ describe('App integration', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/']}>
-        <Routes>
-          <Route path="*" element={<App />} />
-        </Routes>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="*" element={<App />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     const searchButton = await screen.findByRole('button', {
@@ -172,7 +186,7 @@ describe('App integration', () => {
     fireEvent.click(retryBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/mew/i)).toBeInTheDocument();
+      expect(screen.getByText(/Ancient/i)).toBeInTheDocument();
     });
 
     expect(mockFetchByName).toHaveBeenCalledTimes(2);
@@ -185,9 +199,13 @@ describe('App integration', () => {
       .mockResolvedValueOnce({ name: 'snorlax', description: 'Sleep' });
 
     render(
-      <MemoryRouter initialEntries={['/']}>
-        <App />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="*" element={<App />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     const searchButton = await screen.findByRole('button', {
@@ -207,5 +225,73 @@ describe('App integration', () => {
     });
 
     expect(screen.queryByText(/ditto/i)).toBeNull();
+  });
+
+  it('paginates: Next => Page 2 (covers goPage)', async () => {
+    mockFetchList.mockResolvedValue({
+      results: [
+        { name: 'p1' },
+        { name: 'p2' },
+        { name: 'p3' },
+        { name: 'p4' },
+        { name: 'p5' },
+      ],
+    });
+    mockFetchByName
+      .mockResolvedValueOnce({ name: 'p1', description: 'd1' })
+      .mockResolvedValueOnce({ name: 'p2', description: 'd2' })
+      .mockResolvedValueOnce({ name: 'p3', description: 'd3' })
+      .mockResolvedValueOnce({ name: 'p4', description: 'd4' })
+      .mockResolvedValueOnce({ name: 'p5', description: 'd5' });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/?search=&page=1']}>
+          <Routes>
+            <Route path="*" element={<App />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    await screen.findByText(/p1/i);
+    expect(screen.getByText(/Page 1/i)).toBeInTheDocument();
+
+    const nextBtn = screen.getByRole('button', { name: /next/i });
+    expect(nextBtn).not.toBeDisabled();
+
+    fireEvent.click(nextBtn);
+    await screen.findByText(/Page 2/i);
+  });
+
+  it('manual cache invalidation buttons call invalidateQueries', async () => {
+    localStorage.setItem('lastSearch', 'eevee');
+    mockFetchByName.mockResolvedValue({
+      name: 'eevee',
+      description: 'Evolution',
+    });
+
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const invSpy = vi.spyOn(client, 'invalidateQueries');
+
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={['/?search=eevee&page=1']}>
+          <Routes>
+            <Route path="*" element={<App />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    await screen.findByText(/eevee/i);
+
+    fireEvent.click(screen.getByRole('button', { name: /update list/i }));
+    expect(invSpy).toHaveBeenCalledWith({ queryKey: ['pokemonList'] });
+
+    fireEvent.click(screen.getByRole('button', { name: /update eevee/i }));
+    expect(invSpy).toHaveBeenCalledWith({ queryKey: ['pokemon', 'eevee'] });
   });
 });

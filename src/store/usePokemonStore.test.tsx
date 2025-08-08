@@ -95,4 +95,37 @@ describe('usePokemonStore', () => {
     await usePokemonStore.getState().retry();
     expect(loadSpy).toHaveBeenCalled();
   });
+
+  it('setSearchTerm updates state and triggers load()', async () => {
+    vi.spyOn(api, 'fetchPokemonByName').mockResolvedValue({
+      name: 'ab',
+      description: 'd',
+    });
+    usePokemonStore.setState({ searchTerm: '', page: 5 });
+    await usePokemonStore.getState().setSearchTerm('ab');
+
+    const s = usePokemonStore.getState();
+    expect(s.searchTerm).toBe('ab');
+    expect(s.page).toBe(1);
+    expect(api.fetchPokemonByName).toHaveBeenCalledWith('ab');
+  });
+
+  it('setPage refreshes the page and causes the list to load', async () => {
+    vi.spyOn(api, 'fetchPokemonList').mockResolvedValue({
+      count: 1,
+      next: null,
+      previous: null,
+      results: [{ name: 'p', url: 'u' }],
+    });
+    vi.spyOn(api, 'fetchPokemonByName').mockResolvedValue({
+      name: 'p',
+      description: 'd',
+    });
+
+    usePokemonStore.setState({ searchTerm: '', page: 1 });
+    await usePokemonStore.getState().setPage(3);
+
+    expect(usePokemonStore.getState().page).toBe(3);
+    expect(api.fetchPokemonList).toHaveBeenCalled();
+  });
 });
