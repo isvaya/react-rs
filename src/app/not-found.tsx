@@ -1,9 +1,11 @@
-import './NotFound.css';
-import Image from 'next/image';
+'use client';
 
-export const NotFound: React.FC = () => {
+import Image from 'next/image';
+import './NotFound.css';
+
+export default function NotFoundPage() {
   return (
-    <div className="404-container">
+    <div className="container404">
       <Image
         className="image404"
         src="/404pikachu.png"
@@ -15,4 +17,4 @@ export const NotFound: React.FC = () => {
       <h3 className="found404">Not Found</h3>
     </div>
   );
-};
+}
