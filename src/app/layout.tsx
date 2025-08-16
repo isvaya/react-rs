@@ -3,7 +3,7 @@ import '../index.css';
 
 import { Header } from '../components/Header/Header';
 import { Footer } from '../components/Footer/Footer';
-import { ThemeProvider } from '../context/ThemeContext';
+import { Providers } from '../context/Providers';
 
 export const metadata: Metadata = {
   title: 'Pokémon',
@@ -17,11 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider>
+        <Providers>
           <Header />
           <div id="root">{children}</div>
           <Footer />
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
