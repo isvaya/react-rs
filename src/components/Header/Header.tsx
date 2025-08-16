@@ -1,3 +1,5 @@
+'use client';
+
 import { menuItems } from './NavItems';
 import { useTheme } from '../../context/ThemeContext';
 import './Header.css';
