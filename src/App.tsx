@@ -1,32 +1,38 @@
+'use client';
+
 import './App.css';
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useQuery, useQueries } from '@tanstack/react-query';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams, useRouter } from 'next/navigation';
+
 import { SearchControls } from './top-controlls/SearchInput';
 import { SearchResult } from './result/SearchResults';
 import { fetchPokemonByName, fetchPokemonList } from './servise/pokeApi';
 import { ErrorBoundary } from './errorCatching/ErrorBoundary';
 import { Bomb } from './errorCatching/CrashButton';
-
-import { useSearchQuery } from './hooks/useSearchQuery';
 import { SelectionPopup } from './components/SelectionPopup/SelectionPopup';
 
 import type { PokemonListResponse } from './interface/interface';
+import { useTranslations } from 'next-intl';
 
 export const App: React.FC = () => {
+  const t = useTranslations('App');
   const qc = useQueryClient();
   const [crash, setCrash] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useSearchQuery();
-  const [params, setParams] = useSearchParams();
-  const pageParam = parseInt(params.get('page') ?? '1', 10);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const searchRaw = searchParams?.get('search') ?? '';
+  const pageParam = parseInt(searchParams?.get('page') ?? '1', 10);
   const pageSize = 5;
 
-  const [draft, setDraft] = useState(searchQuery);
+  const [searchQuery, setSearchQuery] = useState(searchRaw);
+  const [draft, setDraft] = useState(searchRaw);
+
   useEffect(() => {
-    setDraft(searchQuery);
-  }, [searchQuery]);
+    setDraft(searchRaw);
+  }, [searchRaw]);
 
   const listQuery = useQuery<PokemonListResponse, Error>({
     queryKey: ['pokemonList', pageParam],
@@ -59,10 +65,17 @@ export const App: React.FC = () => {
     .map((q) => q.data)
     .filter((d): d is { name: string; description: string } => Boolean(d));
 
+  const setSearchParams = (search: string, page: string) => {
+    const newParams = new URLSearchParams();
+    newParams.set('search', search);
+    newParams.set('page', page);
+    router.push(`/?${newParams.toString()}`);
+  };
+
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     setSearchQuery(draft);
-    setParams({ search: draft, page: '1' });
+    setSearchParams(draft, '1');
   };
 
   const handleRetry = () => {
@@ -74,7 +87,7 @@ export const App: React.FC = () => {
   };
 
   const goPage = (newPage: number) => {
-    setParams({ search: searchQuery, page: String(newPage) });
+    setSearchParams(searchQuery, String(newPage));
   };
 
   return (
@@ -104,14 +117,16 @@ export const App: React.FC = () => {
             disabled={pageParam <= 1}
             onClick={() => goPage(pageParam - 1)}
           >
-            Prev
+            {t('prev')}
           </button>
-          <span>Page {pageParam}</span>
+          <span>
+            {t('page')} {pageParam}
+          </span>
           <button
             disabled={history.length < pageSize}
             onClick={() => goPage(pageParam + 1)}
           >
-            Next
+            {t('next')}
           </button>
         </div>
       )}
@@ -122,7 +137,7 @@ export const App: React.FC = () => {
         <button
           onClick={() => qc.invalidateQueries({ queryKey: ['pokemonList'] })}
         >
-          Update list
+          {t('updateList')}
         </button>
         {searchQuery && (
           <button
@@ -130,13 +145,13 @@ export const App: React.FC = () => {
               qc.invalidateQueries({ queryKey: ['pokemon', searchQuery] })
             }
           >
-            Update {searchQuery}
+            {t('updateSingle', { name: searchQuery })}
           </button>
         )}
       </div>
 
       <button className="crash-button" onClick={() => setCrash(true)}>
-        Crash App!
+        {t('crash')}
       </button>
       {crash && <Bomb />}
     </ErrorBoundary>

@@ -1,11 +1,12 @@
 .header {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   border-bottom: 2px solid var(--header-border-bottom);
   margin-bottom: 20px;
   padding-bottom: 20px;
+  width: 100%;
 }
 
 .header-logo {
@@ -60,4 +61,16 @@
   font-size: 1rem;
   color: var(--text);
   padding: 0.5em;
+}
+
+.locale-switcher a {
+  margin: 0 0.25rem;
+  text-decoration: none;
+  font-weight: bold;
+  color: #555;
+}
+
+.locale-switcher a.active-locale {
+  color: #d951d0;
+  text-decoration: underline;
 }

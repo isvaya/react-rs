@@ -1,0 +1,48 @@
+{
+  "Home": {
+    "title": "Welcome to Pokémon App"
+  },
+  "Header": {
+    "about": "About",
+    "main": "Main"
+  },
+  "Top-controls": {
+    "title": "Find your Pokémon",
+    "placeholder": "Search full name of Pokemon...",
+    "loading": "Loading...",
+    "search": "Search",
+    "retry": "Try again"
+  },
+  "Results": {
+    "title": "RESULTS:",
+    "select": "Select",
+    "name": "Pokémon's name",
+    "description": "Pokémon's description"
+  },
+  "App": {
+    "prev": "Prev",
+    "next": "Next",
+    "page": "Page",
+    "updateList": "Update list",
+    "updateSingle": "Update {name}",
+    "crash": "Crash App!"
+  },
+  "Popup": {
+    "selected": "Selected {count} elements",
+    "deselect": "Deselect all",
+    "download": "Download CSV"
+  },
+  "Details": {
+    "types": "Types:",
+    "abilities": "Abilities:",
+    "stats": "Stats:"
+  },
+  "About": {
+    "title": "About",
+    "greet": "Hi there! I am Tanya 👋",
+    "p1": "Once upon a time, I was just looking for something “for the soul” — and unexpectedly stumbled into the fascinating world of frontend development.",
+    "p2": "My journey began with RS School courses, and it was love at first div. Since then, I’ve completed Stage 0, Stage 1, and Stage 2, and right now I’m diving deep into React — the deeper I go, the more I love it. Before frontend, I studied Python, but it was the frontend that truly sparked my creativity: you build something, see it come to life, and fall in love with the process all over again. But hey — life’s not only about code 🙂",
+    "p3": "In my spare time, I enjoy digital drawing, 3D modeling, and animation. I love cooking (especially when my boys ask for seconds!), reading everything from classic literature to modern fiction, playing games on my PS5, and staying active through sports 💪",
+    "p4": "I’m a kind and open person by nature. I love learning, I’m not afraid of making mistakes, and I truly believe that any tricky bug can be solved if you keep going. I enjoy teamwork, appreciate honest feedback, and always try to bring positive energy to everything I do. Welcome to my little world — where frontend is magic and code is my way of expressing it 💻✨"
+  }
+}

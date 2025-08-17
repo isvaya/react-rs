@@ -1,21 +1,32 @@
+'use client';
+
 import { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 export function useSearchQuery(): readonly [string, (next: string) => void] {
-  const [params, setParams] = useSearchParams();
-  const raw = params.get('search');
-  const stored = localStorage.getItem('lastSearch') ?? '';
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const search = raw !== null ? raw : stored;
+  const raw = searchParams?.get('search') ?? undefined;
+  const stored =
+    typeof window !== 'undefined'
+      ? (localStorage.getItem('lastSearch') ?? '')
+      : '';
+
+  const search: string = raw ?? stored;
 
   useEffect(() => {
-    if (raw !== null) {
+    if (raw !== undefined) {
       localStorage.setItem('lastSearch', raw);
     }
   }, [raw]);
 
   const setSearch = (next: string) => {
-    setParams({ search: next, page: '1' });
+    const page = '1';
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set('search', next);
+    newSearchParams.set('page', page);
+    router.push(`/?${newSearchParams.toString()}`);
   };
 
   return [search, setSearch] as const;

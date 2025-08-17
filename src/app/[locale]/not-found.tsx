@@ -1,0 +1,20 @@
+'use client';
+
+import Image from 'next/image';
+import './NotFound.css';
+
+export default function NotFoundPage() {
+  return (
+    <div className="container404">
+      <Image
+        className="image404"
+        src="/404pikachu.png"
+        alt="404-pikachu"
+        width={300}
+        height={300}
+      />
+      <h1 className="title404">404</h1>
+      <h3 className="found404">Not Found</h3>
+    </div>
+  );
+}
