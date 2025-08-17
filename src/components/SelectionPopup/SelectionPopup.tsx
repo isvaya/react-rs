@@ -1,8 +1,12 @@
+'use client';
+
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { usePokemonStore } from '../../store/usePokemonStore';
 import './SelectionPopup.css';
 
 export const SelectionPopup: React.FC = () => {
+  const t = useTranslations('Popup');
   const selectedMap = usePokemonStore((s) => s.selected);
   const clearAll = usePokemonStore((s) => s.clearAll);
 
@@ -29,9 +33,9 @@ export const SelectionPopup: React.FC = () => {
 
   return (
     <div className="selection-popup">
-      <span>Selected {items.length} elements</span>
-      <button onClick={clearAll}>Deselect all</button>
-      <button onClick={downloadCSV}>Download CSV</button>
+      <span>{t('selected', { count: items.length })}</span>
+      <button onClick={clearAll}>{t('deselect')}</button>
+      <button onClick={downloadCSV}>{t('download')}</button>
     </div>
   );
 };

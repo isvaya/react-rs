@@ -13,8 +13,10 @@ import { Bomb } from './errorCatching/CrashButton';
 import { SelectionPopup } from './components/SelectionPopup/SelectionPopup';
 
 import type { PokemonListResponse } from './interface/interface';
+import { useTranslations } from 'next-intl';
 
 export const App: React.FC = () => {
+  const t = useTranslations('App');
   const qc = useQueryClient();
   const [crash, setCrash] = useState(false);
 
@@ -115,14 +117,16 @@ export const App: React.FC = () => {
             disabled={pageParam <= 1}
             onClick={() => goPage(pageParam - 1)}
           >
-            Prev
+            {t('prev')}
           </button>
-          <span>Page {pageParam}</span>
+          <span>
+            {t('page')} {pageParam}
+          </span>
           <button
             disabled={history.length < pageSize}
             onClick={() => goPage(pageParam + 1)}
           >
-            Next
+            {t('next')}
           </button>
         </div>
       )}
@@ -133,7 +137,7 @@ export const App: React.FC = () => {
         <button
           onClick={() => qc.invalidateQueries({ queryKey: ['pokemonList'] })}
         >
-          Update list
+          {t('updateList')}
         </button>
         {searchQuery && (
           <button
@@ -141,13 +145,13 @@ export const App: React.FC = () => {
               qc.invalidateQueries({ queryKey: ['pokemon', searchQuery] })
             }
           >
-            Update {searchQuery}
+            {t('updateSingle', { name: searchQuery })}
           </button>
         )}
       </div>
 
       <button className="crash-button" onClick={() => setCrash(true)}>
-        Crash App!
+        {t('crash')}
       </button>
       {crash && <Bomb />}
     </ErrorBoundary>

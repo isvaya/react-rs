@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import type { PokemonWithDescription } from '../interface/interface';
 import { PATHS } from '../enums/enum';
 import { usePokemonStore } from '../store/usePokemonStore';
@@ -8,12 +9,16 @@ import { usePokemonStore } from '../store/usePokemonStore';
 export function PokemonCardRow({ name, description }: PokemonWithDescription) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const locale = useLocale();
+
   const search = searchParams?.toString() ?? '';
   const toggleSelect = usePokemonStore((s) => s.toggleSelect);
   const selected = usePokemonStore((s) => !!s.selected[name]);
 
   const onClick = () => {
-    router.push(`${PATHS.DETAILS}/${name}${search ? `?${search}` : ''}`);
+    router.push(
+      `/${locale}${PATHS.DETAILS}/${name}${search ? `?${search}` : ''}`
+    );
   };
 
   return (

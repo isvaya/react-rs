@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import type { SearchControlsProps } from '../interface/interface';
+import { useTranslations } from 'next-intl';
 
 export const SearchControls: React.FC<SearchControlsProps> = ({
   searchTerm,
@@ -10,17 +13,18 @@ export const SearchControls: React.FC<SearchControlsProps> = ({
   onRetry,
 }) => {
   const isDisabled = loading || searchTerm.trim() === '';
+  const t = useTranslations('Top-controls');
 
   return (
     <form className="top-section" onSubmit={onSearch}>
       <div className="logo-title">
-        <h4>Find your Pokémon</h4>
+        <h4>{t('title')}</h4>
       </div>
       <input
         value={searchTerm}
         onChange={onInputChange}
         type="text"
-        placeholder="Search full name of Pokemon..."
+        placeholder={t('placeholder')}
         className="search-input"
       />
       <button
@@ -28,7 +32,7 @@ export const SearchControls: React.FC<SearchControlsProps> = ({
         disabled={isDisabled}
         className="search-button button"
       >
-        {loading ? 'Loading...' : 'Search'}
+        {loading ? t('loading') : t('search')}
       </button>
       {error && (
         <div className="error-section">
@@ -38,7 +42,7 @@ export const SearchControls: React.FC<SearchControlsProps> = ({
             onClick={onRetry}
             className="retry-button button"
           >
-            Try again
+            {t('retry')}
           </button>
         </div>
       )}

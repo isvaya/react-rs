@@ -1,4 +1,3 @@
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPokemonDetail } from '../../servise/pokeApi';
 import type { PokemonDetail } from '../../interface/interface';
