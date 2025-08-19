@@ -105,3 +105,21 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.layout-main {
+  display: flex;
+  flex-direction: row;
+}
+
+.main-content {
+  flex: 2;
+  padding: 1rem;
+}
+
+.detail-view {
+  flex: 1;
+  border-left: 1px solid #ddd;
+  padding: 1rem;
+}
+
+

@@ -4,7 +4,7 @@
   align-items: center;
   border-left: 2px solid var(--detail-view-border-left-color);
   padding: 0px 20px;
-  width: 100%;
+  width: auto;
 }
 
 .detail-top {

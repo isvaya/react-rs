@@ -25,9 +25,11 @@ export default async function DetailsPage(props: DetailsPageProps) {
     notFound();
   }
 
-  const searchQuery = resolvedSearchParams?.search
-    ? `?search=${resolvedSearchParams.search}`
-    : '';
+  // const searchQuery = resolvedSearchParams?.search
+  //   ? `?search=${resolvedSearchParams.search}`
+  //   : '';
+
+  const searchQuery = resolvedSearchParams?.search as string | undefined;
 
   return (
     <div className="detail-view">
@@ -42,7 +44,7 @@ export default async function DetailsPage(props: DetailsPageProps) {
         <Link
           href={{
             pathname: `/${locale}`,
-            query: searchQuery,
+            query: searchQuery ? { search: searchQuery } : {},
           }}
           replace
           className="detail-close"

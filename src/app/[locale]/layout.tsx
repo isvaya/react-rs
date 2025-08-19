@@ -17,10 +17,11 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
+  // details,
   params,
 }: {
   children: React.ReactNode;
-  // modal: React.ReactNode;
+  // details: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
@@ -39,9 +40,8 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
             <Header />
-            <main>
-              <div>{children}</div>
-              {/* <aside>{modal}</aside> */}
+            <main className="layout-main">
+              <div className="main-content">{children}</div>
             </main>
             <Footer />
           </Providers>
