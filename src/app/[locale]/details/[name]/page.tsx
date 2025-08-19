@@ -7,13 +7,16 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 interface DetailsPageProps {
-  params: { locale: string; name: string };
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  params: Promise<{ locale: string; name: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function DetailsPage(props: DetailsPageProps) {
-  const { locale, name } = await props.params;
-  const resolvedSearchParams = await props.searchParams;
+export default async function DetailsPage({
+  params,
+  searchParams,
+}: DetailsPageProps) {
+  const { locale, name } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
 
   const t = await getTranslations({ locale, namespace: 'Details' });
 
@@ -24,10 +27,6 @@ export default async function DetailsPage(props: DetailsPageProps) {
   if (!data) {
     notFound();
   }
-
-  // const searchQuery = resolvedSearchParams?.search
-  //   ? `?search=${resolvedSearchParams.search}`
-  //   : '';
 
   const searchQuery = resolvedSearchParams?.search as string | undefined;
 

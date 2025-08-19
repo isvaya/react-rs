@@ -3,7 +3,7 @@
 import './App.css';
 import React, { useEffect, useState } from 'react';
 import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 import { SearchControls } from './top-controlls/SearchInput';
 import { SearchResult } from './result/SearchResults';
@@ -15,28 +15,30 @@ import { SelectionPopup } from './components/SelectionPopup/SelectionPopup';
 import type { PokemonListResponse } from './interface/interface';
 import { useTranslations } from 'next-intl';
 
-export const App: React.FC = () => {
+interface AppProps {
+  search: string;
+  page: number;
+}
+
+export const App: React.FC<AppProps> = ({ search, page }) => {
   const t = useTranslations('App');
   const qc = useQueryClient();
   const [crash, setCrash] = useState(false);
 
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const searchRaw = searchParams?.get('search') ?? '';
-  const pageParam = parseInt(searchParams?.get('page') ?? '1', 10);
   const pageSize = 5;
 
-  const [searchQuery, setSearchQuery] = useState(searchRaw);
-  const [draft, setDraft] = useState(searchRaw);
+  const [searchQuery, setSearchQuery] = useState(search);
+  const [draft, setDraft] = useState(search);
 
   useEffect(() => {
-    setDraft(searchRaw);
-  }, [searchRaw]);
+    setDraft(search);
+    setSearchQuery(search);
+  }, [search]);
 
   const listQuery = useQuery<PokemonListResponse, Error>({
-    queryKey: ['pokemonList', pageParam],
-    queryFn: () => fetchPokemonList(pageSize, (pageParam - 1) * pageSize),
+    queryKey: ['pokemonList', page],
+    queryFn: () => fetchPokemonList(pageSize, (page - 1) * pageSize),
     enabled: searchQuery === '',
     staleTime: 1000 * 60 * 5,
   });
@@ -113,18 +115,15 @@ export const App: React.FC = () => {
 
       {searchQuery === '' && listQuery.data && history.length > 0 && (
         <div className="pagination">
-          <button
-            disabled={pageParam <= 1}
-            onClick={() => goPage(pageParam - 1)}
-          >
+          <button disabled={page <= 1} onClick={() => goPage(page - 1)}>
             {t('prev')}
           </button>
           <span>
-            {t('page')} {pageParam}
+            {t('page')} {page}
           </span>
           <button
             disabled={history.length < pageSize}
-            onClick={() => goPage(pageParam + 1)}
+            onClick={() => goPage(page + 1)}
           >
             {t('next')}
           </button>

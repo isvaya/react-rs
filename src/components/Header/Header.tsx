@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
         <h1 className="title-pokemon">PokéApi</h1>
       </div>
       <button className="theme-toggle" onClick={toggleTheme}>
-        {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+        {theme === 'light' ? '🌙' : '☀️'}
       </button>
       <div className="locale-switcher">
         {languages.map((lang) => (
