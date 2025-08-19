@@ -1,9 +1,7 @@
 import createNextIntlPlugin from 'next-intl/plugin';
-// import { NextConfig } from 'next';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: './dist',
   images: {
     unoptimized: true,
   },
