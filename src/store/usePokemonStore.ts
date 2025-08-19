@@ -22,7 +22,11 @@ export interface PokemonState {
 export const usePokemonStore = create<PokemonState>((set, get) => ({
   loading: false,
   error: null,
-  searchTerm: localStorage.getItem('lastSearch') ?? '',
+  searchTerm:
+    typeof window !== 'undefined'
+      ? (localStorage.getItem('lastSearch') ?? '')
+      : '',
+
   page: 1,
   history: [],
   selected: {},

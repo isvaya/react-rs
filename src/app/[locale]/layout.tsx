@@ -17,11 +17,10 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  modal,
   params,
 }: {
   children: React.ReactNode;
-  modal: React.ReactNode;
+  // modal: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
@@ -42,7 +41,7 @@ export default async function RootLayout({
             <Header />
             <main>
               <div>{children}</div>
-              <aside>{modal}</aside>
+              {/* <aside>{modal}</aside> */}
             </main>
             <Footer />
           </Providers>

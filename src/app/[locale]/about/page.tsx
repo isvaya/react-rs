@@ -1,8 +1,17 @@
-import { getTranslations } from 'next-intl/server';
 import './About.css';
+import { routing } from '@/i18n/routing';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 
-export default async function AboutPage() {
-  const t = await getTranslations('About');
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function AboutPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  // вместо useTranslations — серверный getTranslations
+  const t = await getTranslations({ locale, namespace: 'About' });
 
   return (
     <div className="about-container">
@@ -14,4 +23,8 @@ export default async function AboutPage() {
       <p className="about-text">{t('p4')}</p>
     </div>
   );
+}
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
 }

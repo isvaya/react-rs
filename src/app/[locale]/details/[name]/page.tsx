@@ -1,4 +1,4 @@
-// import './MasterDetail.css';
+import './MasterDetail.css';
 import { fetchPokemonDetail } from '@/servise/pokeApi';
 import type { PokemonDetail } from '@/interface/interface';
 import Image from 'next/image';
