@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import './NotFound.css';
+import './not-found.css';
 
 export default function NotFoundPage() {
   return (
